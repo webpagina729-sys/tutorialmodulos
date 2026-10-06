@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Necesario para YouTube: sin Referer el reproductor muestra "Error 153" -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Revende Ways | Tutoriales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.youtube-nocookie.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#0a5be8; --blue-dark:#0847b5; --navy:#0b1f5c;
+    --green:#4cc43a; --green-dark:#2f9a26;
+    --black:#0a0a0a; --ink:#111827; --muted:#475569; --line:#d9e2f1; --bg:#eef3fb; --white:#fff;
+    --radius:14px; --max:960px; --pad:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:-.005em;background:var(--bg);color:var(--ink);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+  main{flex:1}
+  .wrap{width:100%;max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+  body:before{content:"";display:block;height:8px;background:linear-gradient(90deg,var(--black) 0 30%,var(--blue) 30% 65%,var(--green) 65%)}
+
+  /* Banner */
+  .banner{padding-top:var(--pad)}
+  .banner img{display:block;width:100%;height:auto;border-radius:var(--radius);border:2px solid var(--black);background:var(--navy)}
+
+  /* Intro */
+  .intro{margin-top:16px;background:var(--white);border:2px solid var(--black);border-radius:var(--radius);padding:24px 22px 46px;box-shadow:6px 6px 0 var(--blue)}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green-dark);margin-bottom:10px}
+  .kicker:before{content:"";width:22px;height:4px;border-radius:4px;background:var(--green)}
+  .intro h1{font-size:1.35rem;font-weight:700;line-height:1.3;letter-spacing:-.02em;color:var(--black);margin-bottom:12px}
+  .intro h1 em{font-style:normal;color:var(--blue)}
+  .intro p{color:var(--muted);margin-bottom:16px}
+  .pill{display:inline-block;background:var(--blue);color:#fff;font-weight:500;padding:7px 18px;border-radius:999px;line-height:1.35;margin:0}
+  .intro p.pill{color:#fff;margin:0}
+
+  /* Divider + botones */
+  .divider{display:flex;align-items:center;gap:14px;position:relative;z-index:2;transform:translateY(-20px);margin:0 0 -20px}
+  .divider:before,.divider:after{content:"";flex:1;height:5px;border-radius:5px}
+  .divider:before{background:var(--blue)} .divider:after{background:var(--green)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:2px solid var(--black);cursor:pointer;font:inherit;font-weight:500;letter-spacing:.2px;text-decoration:none;text-align:center;padding:9px 34px;min-width:230px;border-radius:10px;color:#fff;background:var(--black);line-height:1.4;box-shadow:4px 4px 0 var(--green);transition:background .2s,transform .1s,box-shadow .1s}
+  .btn:hover{background:#222}
+  .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--green)}
+  .btn:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+  .btn[disabled]{background:#3a3a3a;cursor:default;box-shadow:4px 4px 0 var(--line);transform:none}
+  .btn .arrow{transition:transform .2s}
+  .btn:hover .arrow{transform:translateX(3px)}
+  .btn-blue{background:var(--blue);box-shadow:4px 4px 0 var(--black)}
+  .btn-blue:hover{background:var(--blue-dark)}
+  .btn-blue:active{box-shadow:2px 2px 0 var(--black)}
+
+  /* Cortina */
+  .curtain{display:grid;grid-template-rows:0fr;transition:grid-template-rows .7s ease}
+  .curtain.open{grid-template-rows:1fr}
+  .curtain>.inner{overflow:hidden;min-height:0}
+  .curtain .pad{padding:40px 8px 8px 0}
+
+  /* Módulo */
+  .module{background:var(--white);border:2px solid var(--black);border-radius:var(--radius);overflow:hidden;box-shadow:6px 6px 0 var(--green)}
+  .module-head{background:var(--black);color:#fff;padding:16px 22px;border-bottom:5px solid var(--green)}
+  .module-head .pill{font-size:.82rem;padding:4px 14px}
+  .module-head h2{font-size:1.2rem;font-weight:600;line-height:1.35;letter-spacing:-.01em;margin-top:8px}
+  .module-body{padding:20px 22px 24px}
+  .label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--blue);margin-bottom:6px}
+  .label:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .module-body p{margin-bottom:20px;color:var(--muted)}
+
+  /* Video 16:9 (con respaldo para navegadores sin aspect-ratio) */
+  .video{position:relative;width:100%;height:0;padding-top:56.25%;background:#000;border-radius:10px;overflow:hidden;border:2px solid var(--black)}
+  .video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;display:block}
+  .video .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c9d1e0;font-size:.9rem}
+  .video-notice{display:none;margin-top:12px;padding:10px 14px;border-radius:10px;background:#fff7e0;border:1px solid #f0c64a;color:#6b4e00;font-size:.9rem}
+  .video-notice.show{display:block}
+  .yt-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:.9rem;font-weight:500;color:var(--blue);text-decoration:none}
+  .yt-link:hover{text-decoration:underline}
+
+  /* Cierre */
+  .closing{margin-top:24px;text-align:center;background:var(--white);border:2px solid var(--black);border-top:8px solid var(--blue);border-radius:var(--radius);padding:24px 22px 26px;box-shadow:6px 6px 0 var(--blue)}
+  .closing p{font-weight:600;color:var(--black);margin-bottom:18px}
+
+  /* Footer */
+  footer{margin-top:28px;background:var(--black);border-top:5px solid var(--green);color:#fff;padding:22px var(--pad)}
+  .foot-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 18px;text-align:center}
+  .foot-inner .brand{font-weight:700;font-size:1.05rem;letter-spacing:.06em}
+  .foot-inner .brand span{color:var(--green)}
+  .foot-inner .sep{width:1px;height:16px;background:#555}
+  .foot-inner .rights{font-weight:300;font-size:.9rem;color:#c9d1e0;letter-spacing:.02em}
+
+  @media (max-width:520px){
+    .foot-inner{flex-direction:column}.foot-inner .sep{display:none}
+    .btn{min-width:0;width:100%;max-width:320px;padding:9px 20px}
+    .divider{gap:10px}
+  }
+  @media (min-width:700px){
+    :root{--pad:24px}
+    .intro{padding:30px 34px 48px} .intro h1{font-size:1.65rem}
+    .module-head{padding:18px 32px} .module-head h2{font-size:1.4rem}
+    .module-body{padding:26px 32px 30px}
+  }
+  @media (max-height:480px) and (orientation:landscape){.intro{padding:16px 22px 38px}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.curtain,.btn,.btn .arrow{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="wrap banner">
+  <img src="bannervi.png" alt="Revende Ways" width="1200" height="300">
+</header>
+
+<main class="wrap">
+
+  <section class="intro">
+    <span class="kicker">Tutoriales Revende Ways</span>
+    <h1>Antes de ir a la configuración de tu propia tienda, <em>te mostraremos cómo llegar</em></h1>
+    <p>Todos los datos, márgenes y formularios de estos módulos fueron utilizados para la demo de cómo configurar nuestra tienda. Teniendo esto en cuenta, continuemos con el primer paso.</p>
+    <p class="pill">Cómo abrir la puerta de mi propio negocio:</p>
+  </section>
+
+  <div class="divider">
+    <button class="btn" id="btnStart" aria-expanded="false" aria-controls="curtain1">Aceptar y Comenzar <span class="arrow" aria-hidden="true">→</span></button>
+  </div>
+
+  <div class="curtain" id="curtain1">
+    <div class="inner">
+      <div class="pad">
+        <article class="module">
+          <div class="module-head">
+            <span class="pill">Módulo Nº 1</span>
+            <h2>Cómo comenzar a configurar tu propio negocio</h2>
+          </div>
+          <div class="module-body">
+            <div class="label">En este módulo verás:</div>
+            <p>Cómo encontrar tu código de revendedor y abrir, con ese código, la puerta de tu propio negocio.</p>
+            <div class="label">Video:</div>
+            <div class="video" id="videoBox" data-id="F_cdxq9RNrY">
+              <div class="loading">Cargando video…</div>
+            </div>
+            <div class="video-notice" id="videoNotice">
+              Estás abriendo la página como archivo local. YouTube solo reproduce videos embebidos en páginas publicadas en un servidor (http/https). Súbela a tu hosting o usa el enlace de abajo.
+            </div>
+            <a class="yt-link" id="ytLink" href="https://www.youtube.com/watch?v=F_cdxq9RNrY" target="_blank" rel="noopener">¿No se reproduce? Ver en YouTube ↗</a>
+          </div>
+        </article>
+
+        <section class="closing">
+          <p>Teniendo en cuenta esta información, vayamos a buscar el código.</p>
+          <a class="btn btn-blue" href="https://tutiendapropia.revendeways.shop/">Ir por el código <span class="arrow" aria-hidden="true">→</span></a>
+        </section>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <span class="brand">Revende <span>Ways</span></span>
+    <span class="sep"></span>
+    <span class="rights">&copy; <span id="year"></span> Todos los derechos reservados</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('btnStart');
+    var curtain = document.getElementById('curtain1');
+    var box = document.getElementById('videoBox');
+    var notice = document.getElementById('videoNotice');
+    var isServed = /^https?:$/.test(location.protocol);
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function loadVideo() {
+      if (box.querySelector('iframe')) return;
+      var params = 'rel=0&playsinline=1&enablejsapi=0';
+      if (isServed) params += '&origin=' + encodeURIComponent(location.origin);
+
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + box.dataset.id + '?' + params;
+      f.title = 'Módulo 1 - Cómo comenzar a configurar tu propio negocio';
+      f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
+      f.setAttribute('allowfullscreen', '');
+      f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+      f.setAttribute('frameborder', '0');
+      f.addEventListener('load', function () {
+        var l = box.querySelector('.loading'); if (l) l.remove();
+      });
+      box.appendChild(f);
+
+      if (!isServed) notice.classList.add('show');
+    }
+
+    btn.addEventListener('click', function () {
+      loadVideo();
+      curtain.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      btn.disabled = true;
+      btn.innerHTML = 'Módulo desplegado ✓';
+      setTimeout(function () { curtain.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+    });
+  })();
+</script>
+</body>
+</html>

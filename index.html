@@ -7,6 +7,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Revende Ways | Tutoriales</title>
 <link rel="icon" type="image/png" href="modo.png">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.youtube-nocookie.com">
@@ -38,6 +39,10 @@
   .intro p{color:var(--muted);margin-bottom:16px}
   .pill{display:inline-block;background:var(--blue);color:#fff;font-weight:500;padding:7px 18px;border-radius:999px;line-height:1.35;margin:0}
   .intro p.pill{color:#fff;margin:0}
+
+  /* Turnstile anti-bot */
+  .ts-box{margin-top:18px;min-height:65px}
+  .ts-hint{font-size:.85rem;color:var(--muted);margin-top:6px}
 
   /* Divider + botones */
   .divider{display:flex;align-items:center;gap:14px;position:relative;z-index:2;transform:translateY(-20px);margin:0 0 -20px}
@@ -119,10 +124,16 @@
     <h1>Antes de ir a la configuración de tu propia tienda, <em>te mostraremos cómo llegar</em></h1>
     <p>Todos los datos, márgenes y formularios de estos módulos fueron utilizados para la demo de cómo configurar nuestra tienda. Teniendo esto en cuenta, continuemos con el primer paso.</p>
     <p class="pill">Cómo abrir la puerta de mi propio negocio:</p>
+    <div class="ts-box">
+      <!-- Reemplaza TU_SITE_KEY por la Site Key de tu panel de Cloudflare Turnstile -->
+      <div class="cf-turnstile" data-sitekey="TU_SITE_KEY" data-language="es" data-theme="light"
+           data-callback="onTurnstileOk" data-expired-callback="onTurnstileReset" data-error-callback="onTurnstileReset"></div>
+      <p class="ts-hint" id="tsHint">Completa la verificación para continuar.</p>
+    </div>
   </section>
 
   <div class="divider">
-    <button class="btn" id="btnStart" aria-expanded="false" aria-controls="curtain1">Aceptar y Comenzar <span class="arrow" aria-hidden="true">→</span></button>
+    <button class="btn" id="btnStart" aria-expanded="false" aria-controls="curtain1" disabled>Aceptar y Comenzar <span class="arrow" aria-hidden="true">→</span></button>
   </div>
 
   <div class="curtain" id="curtain1">
@@ -166,6 +177,21 @@
 </footer>
 
 <script>
+  // Turnstile: el botón solo se habilita cuando la verificación es exitosa
+  var tsVerified = false;
+  function onTurnstileOk() {
+    tsVerified = true;
+    var b = document.getElementById('btnStart');
+    if (b.getAttribute('aria-expanded') !== 'true') b.disabled = false;
+    document.getElementById('tsHint').textContent = 'Verificación completada ✓';
+  }
+  function onTurnstileReset() {
+    tsVerified = false;
+    var b = document.getElementById('btnStart');
+    if (b.getAttribute('aria-expanded') !== 'true') b.disabled = true;
+    document.getElementById('tsHint').textContent = 'Completa la verificación para continuar.';
+  }
+
   (function () {
     var btn = document.getElementById('btnStart');
     var curtain = document.getElementById('curtain1');
@@ -196,6 +222,7 @@
     }
 
     btn.addEventListener('click', function () {
+      if (!tsVerified) return;
       loadVideo();
       curtain.classList.add('open');
       btn.setAttribute('aria-expanded', 'true');

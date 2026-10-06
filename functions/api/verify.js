@@ -67,7 +67,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   if (!outcome.success) {
-    return json({ ok: false, error: 'invalid_token' }, 403);
+    const codes = Array.isArray(outcome['error-codes']) ? outcome['error-codes'].join(',') : '';
+    return json({ ok: false, error: 'invalid_token' + (codes ? ':' + codes : '') }, 403);
   }
 
   // El token debe haberse generado en este mismo dominio

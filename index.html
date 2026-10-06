@@ -109,6 +109,26 @@
   }
   @media (max-height:480px) and (orientation:landscape){.intro{padding:16px 22px 38px}}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.curtain,.btn,.btn .arrow{transition:none}}
+
+  /* ===== Ajuste móvil: verificación centrada y textos sin huérfanas ===== */
+  .intro h1,.module-head h2,.m-head h2,.closing p,.pill{text-wrap:balance}
+  .intro p,.module-body p,.m-in p.desc,.note,.ts-hint{text-wrap:pretty}
+  .ts-box{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:20px;min-height:0}
+  .cf-turnstile{width:300px;height:65px;flex:none;transform-origin:center top}
+  .ts-hint{margin-top:8px;max-width:300px}
+  @media (max-width:520px){
+    :root{--pad:12px}
+    body{font-size:15px}
+    .intro{padding:20px 16px 40px}
+    .intro h1{font-size:1.2rem}
+    .intro p{margin-bottom:12px}
+    .pill{padding:6px 14px;font-size:.92rem}
+    .module-head,.m-head{padding:14px 16px}
+    .module-head h2,.m-head h2{font-size:1.05rem}
+    .module-body,.m-in{padding:16px 16px 20px}
+    .closing{padding:20px 16px 22px}
+    .chev{width:30px;height:30px}
+  }
 </style>
 </head>
 <body>
@@ -178,6 +198,19 @@
 </footer>
 
 <script>
+
+  // Ajusta el cuadro de Turnstile al ancho disponible (pantallas angostas)
+  function fitTurnstile() {
+    var el = document.querySelector('.cf-turnstile');
+    if (!el) return;
+    var w = el.parentNode.clientWidth;
+    var s = Math.min(1, w / 300);
+    el.style.transform = s < 1 ? 'scale(' + s.toFixed(3) + ')' : '';
+    el.style.marginBottom = s < 1 ? (-(65 * (1 - s))).toFixed(1) + 'px' : '';
+  }
+  fitTurnstile();
+  window.addEventListener('resize', fitTurnstile);
+
   // Turnstile: el botón solo se habilita cuando la verificación es exitosa.
   // El token se valida en el servidor (/api/verify) y solo entonces llega el video.
   var tsVerified = false, tsToken = '';

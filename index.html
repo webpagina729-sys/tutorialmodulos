@@ -129,6 +129,7 @@
       <div class="cf-turnstile" data-sitekey="0x4AAAAAAEuP7UTtW1odDnHM" data-language="es" data-theme="light"
            data-callback="onTurnstileOk" data-expired-callback="onTurnstileReset" data-error-callback="onTurnstileReset"></div>
       <p class="ts-hint" id="tsHint">Completa la verificación para continuar.</p>
+      <p class="ts-hint" id="tsErr" style="color:#b91c1c;font-weight:500" hidden></p>
     </div>
   </section>
 
@@ -148,13 +149,13 @@
             <div class="label">En este módulo verás:</div>
             <p>Cómo encontrar tu código de revendedor y abrir, con ese código, la puerta de tu propio negocio.</p>
             <div class="label">Video:</div>
-            <div class="video" id="videoBox" data-id="F_cdxq9RNrY">
+            <div class="video" id="videoBox">
               <div class="loading">Cargando video…</div>
             </div>
             <div class="video-notice" id="videoNotice">
               Estás abriendo la página como archivo local. YouTube solo reproduce videos embebidos en páginas publicadas en un servidor (http/https). Súbela a tu hosting o usa el enlace de abajo.
             </div>
-            <a class="yt-link" id="ytLink" href="https://www.youtube.com/watch?v=F_cdxq9RNrY" target="_blank" rel="noopener">¿No se reproduce? Ver en YouTube ↗</a>
+            <a class="yt-link" id="ytLink" href="#" target="_blank" rel="noopener" hidden>¿No se reproduce? Ver en YouTube ↗</a>
           </div>
         </article>
 
@@ -177,16 +178,19 @@
 </footer>
 
 <script>
-  // Turnstile: el botón solo se habilita cuando la verificación es exitosa
-  var tsVerified = false;
-  function onTurnstileOk() {
+  // Turnstile: el botón solo se habilita cuando la verificación es exitosa.
+  // El token se valida en el servidor (/api/verify) y solo entonces llega el video.
+  var tsVerified = false, tsToken = '';
+  function onTurnstileOk(token) {
     tsVerified = true;
+    tsToken = token;
     var b = document.getElementById('btnStart');
     if (b.getAttribute('aria-expanded') !== 'true') b.disabled = false;
     document.getElementById('tsHint').textContent = 'Verificación completada ✓';
   }
   function onTurnstileReset() {
     tsVerified = false;
+    tsToken = '';
     var b = document.getElementById('btnStart');
     if (b.getAttribute('aria-expanded') !== 'true') b.disabled = true;
     document.getElementById('tsHint').textContent = 'Completa la verificación para continuar.';
@@ -201,13 +205,17 @@
 
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    function loadVideo() {
+    function loadVideo(id) {
       if (box.querySelector('iframe')) return;
       var params = 'rel=0&playsinline=1&enablejsapi=0';
       if (isServed) params += '&origin=' + encodeURIComponent(location.origin);
 
+      var yt = document.getElementById('ytLink');
+      yt.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(id);
+      yt.hidden = false;
+
       var f = document.createElement('iframe');
-      f.src = 'https://www.youtube-nocookie.com/embed/' + box.dataset.id + '?' + params;
+      f.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?' + params;
       f.title = 'Módulo 1 - Cómo comenzar a configurar tu propio negocio';
       f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
       f.setAttribute('allowfullscreen', '');
@@ -221,14 +229,40 @@
       if (!isServed) notice.classList.add('show');
     }
 
+    function fail(msg) {
+      btn.innerHTML = 'Aceptar y Comenzar <span class="arrow" aria-hidden="true">→</span>';
+      onTurnstileReset();
+      var e = document.getElementById('tsErr');
+      e.textContent = msg;
+      e.hidden = false;
+      if (window.turnstile) turnstile.reset();
+    }
+
     btn.addEventListener('click', function () {
-      if (!tsVerified) return;
-      loadVideo();
-      curtain.classList.add('open');
-      btn.setAttribute('aria-expanded', 'true');
+      if (!tsVerified || !tsToken) return;
       btn.disabled = true;
-      btn.innerHTML = 'Módulo desplegado ✓';
-      setTimeout(function () { curtain.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+      btn.innerHTML = 'Verificando…';
+
+      fetch('/api/verify', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ token: tsToken, page: 'tutoriales' })
+      })
+        .then(function (r) {
+          return r.text().then(function (t) {
+            try { return JSON.parse(t); }
+            catch (e) { return { ok: false, error: 'http_' + r.status + '_sin_funcion' }; }
+          });
+        })
+        .then(function (data) {
+          if (!data.ok || !data.video) { fail('No pudimos validar la verificación. Código: ' + (data.error || 'desconocido')); return; }
+          loadVideo(data.video.id);
+          curtain.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          btn.innerHTML = 'Módulo desplegado ✓';
+          setTimeout(function () { curtain.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+        })
+        .catch(function () { fail('Error de conexión con /api/verify. Código: sin_respuesta'); });
     });
   })();
 </script>
